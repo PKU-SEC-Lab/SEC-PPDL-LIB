@@ -6,6 +6,9 @@ target_link_libraries(OptiPrime PUBLIC LinearLayer NonlinearOperator FalconDepth
 add_executable(test_quant_imagenet src/TestImageNet.cpp)
 target_link_libraries(test_quant_imagenet PRIVATE OptiPrime)
 
+add_executable(face_w4a8 EXCLUDE_FROM_ALL face/Compact.cpp)
+target_link_libraries(face_w4a8 PRIVATE OptiPrime Model)
+
 if(NOT BUILD_TESTING)
     return()
 endif()

@@ -58,6 +58,21 @@ auto output_share = conv(input_share);
 
 For the complete ImageNet experiment, link the `OptiPrime` target and use `<OptiPrime/Bundle.h>`. The [two-party runner](src/TestImageNet.cpp) shows model loading, OT preparation, inference and secure argmax.
 
+### Compact FaceResNet64 verification
+
+The CPU benchmark quantizes synthetic dense weights to W4 and uses A8 activations with a 20-bit accumulator. It checks the 128-dimensional embeddings and the secure cosine decision for two synthetic pairs against an integer reference. The fixture uses two channel-scale groups. This benchmark measures protocol correctness and latency on synthetic inputs.
+
+From the repository root, use Python 3.11 or later with NumPy installed.
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DSEC_PPDL_BUILD_QUANT_EXPERIMENTS=ON
+cmake --build build --target face_w4a8 -j8
+python3 Experiments/OptiPrime/face/run.py --binary build/Experiments/OptiPrime/face_w4a8 --mode exact
+python3 Experiments/OptiPrime/face/run.py --binary build/Experiments/OptiPrime/face_w4a8 --mode light --wan
+```
+
+Both modes support loopback and the optional `--wan` proxy (400 Mb/s per direction, 20 ms RTT). The runner uses 16 HE workers and three OT threads per party. Use `--server-cpus` and `--client-cpus` for optional CPU pinning. Each run writes its generated fixtures, logs and summary to a new directory under `build/face-w4a8/`. Pair latency includes both forwards and the secure match. Setup, weight packing and opening embeddings for verification are timed separately or outside that interval.
+
 ## Performance
 
 ### CPU latency and communication
