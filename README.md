@@ -2,7 +2,7 @@
 
 <h3 align="center">SEC-PPDL: A High-Performance Library for Two-Party Private Neural Network Inference on CPUs and GPUs</h3>
 
-<p align="center">Build and benchmark private inference protocols, from a single encrypted layer to a complete neural network.</p>
+<p align="center">Fast private inference through a simple C++ API, from individual layers to full neural networks.</p>
 
 <p align="center">
   <a href="https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tree/v1.0"><img src="https://img.shields.io/badge/version-1.0-38689B" alt="Version: 1.0"></a>
