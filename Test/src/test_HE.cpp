@@ -1,4 +1,5 @@
-#include <Model/ResNet.h>
+#include <HE/HE.h>
+#include <Utils/ArgMapping/ArgMapping.h>
 #include <fstream>
 #include <iostream>
 using namespace std;

@@ -1,6 +1,6 @@
 #pragma once
 #include <LinearLayer/Conv.h>
-#include <Model/Primitive.h>
+#include <Runtime/Primitive.h>
 #include <NonlinearLayer/Pool.h>
 #include <memory>
 #include <vector>

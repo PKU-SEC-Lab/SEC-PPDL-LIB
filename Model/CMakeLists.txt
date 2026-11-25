@@ -8,8 +8,7 @@ add_library(Model STATIC ${srcs})
 target_include_directories(Model PUBLIC include)
 
 target_link_libraries(Model PUBLIC
-    LinearLayer
-    NonlinearLayer
+    Runtime
 )
 
 message(STATUS "Model_FOUND: ${Model_FOUND}")

@@ -5,7 +5,7 @@
  */
 
 #include <LinearLayer/CirLinear.h>
-#include <Model/ResNet.h>
+#include <Utils/ArgMapping/ArgMapping.h>
 #include <iostream>
 #include <iomanip>
 
