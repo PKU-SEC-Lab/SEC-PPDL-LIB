@@ -15,7 +15,7 @@
 |---|---|
 | Convolution | Dense and multiplier-one depthwise convolution, stride and padding, multithreaded CPU and CUDA GPU. |
 | ImageNet models | ResNet-18/34/50, VGG-16/19 and MobileNetV2. [Network definitions](imagenet/architecture.py) |
-| Integer inference | Exact or approximate requantization. Configurable convolution weight width (2–8 bits), activation width (2–16), classifier width (2–8) and work-ring width (20–32). |
+| Integer inference | Exact requantization or requantization with randomized truncation. Configurable convolution weight width (2–8 bits), activation width (2–16), classifier width (2–8) and work-ring width (20–32). |
 | Execution | IKNP or Ferret OT, per-image preprocessing, CUDA Graphs and optional compact HE outputs. See `python3 Experiments/OptiPrime/run.py --help` for switches. |
 
 ## Quick Start
