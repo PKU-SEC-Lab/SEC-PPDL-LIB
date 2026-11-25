@@ -1,0 +1,6 @@
+add_subdirectory(OptiPrime)
+add_subdirectory(FaceResNet)
+if(SEC_PPDL_BUILD_EXPERIMENTS)
+    add_subdirectory(ResNet)
+    add_subdirectory(Benchmarks)
+endif()

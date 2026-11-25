@@ -6,15 +6,13 @@ target_link_libraries(OptiPrime PUBLIC LinearLayer NonlinearOperator FalconDepth
 add_executable(test_quant_imagenet src/TestImageNet.cpp)
 target_link_libraries(test_quant_imagenet PRIVATE OptiPrime)
 
-add_executable(face_w4a8 EXCLUDE_FROM_ALL face/Compact.cpp)
-target_link_libraries(face_w4a8 PRIVATE OptiPrime Model)
+add_executable(test_falcon_depthwise EXCLUDE_FROM_ALL falcon/Depthwise.cpp)
+target_link_libraries(test_falcon_depthwise PRIVATE FalconDepthwise)
 
 if(NOT BUILD_TESTING)
     return()
 endif()
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
-add_executable(test_falcon_depthwise EXCLUDE_FROM_ALL falcon/Depthwise.cpp)
-target_link_libraries(test_falcon_depthwise PRIVATE FalconDepthwise)
 add_executable(test_prepared_ot src/TestPreparedOT.cpp)
 target_link_libraries(test_prepared_ot PRIVATE OptiPrime)
 add_executable(test_quant_protocols src/TestProtocols.cpp)

@@ -33,7 +33,3 @@ namespace Utils {
 
 
 }
-
-int main() {
-    return 0;
-}

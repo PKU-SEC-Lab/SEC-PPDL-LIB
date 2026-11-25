@@ -39,12 +39,3 @@ target_link_libraries(Utils
     PUBLIC ${OPENSSL_LIBRARIES} ${GMP_LIBRARIES}
     HEXL::hexl
 )
-
-
-add_executable(Utils_test ${CMAKE_CURRENT_SOURCE_DIR}/src/utils.cpp)
-
-message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
-target_link_libraries(Utils_test Utils)
-
-
-message(STATUS "Utils_FOUND: ${Utils_FOUND}")

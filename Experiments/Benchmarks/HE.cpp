@@ -1,9 +1,11 @@
 #include <HE/HE.h>
 #include <Utils/ArgMapping/ArgMapping.h>
-#include <fstream>
+#include <Datatype/Tensor.h>
 #include <iostream>
 using namespace std;
-using namespace HE;
+using HE::unified::UnifiedCiphertext;
+using HE::unified::UnifiedPlaintext;
+using Datatype::Tensor;
 
 int party, port = 32000;
 int num_threads = 2;
@@ -25,7 +27,7 @@ int main(int argc, char* argv[]) {
     UnifiedCiphertext ct1_l(HE.GenerateZeroCiphertext(HE.Backend()));
     Tensor<UnifiedCiphertext> temp_results1({2, 64}, HE.GenerateZeroCiphertext(HE.Backend()));
     Tensor<UnifiedCiphertext> rotatedIR({2, 64}, HE.GenerateZeroCiphertext(HE.Backend()));
-    Tensor<UnifiedPlaintext> encodeMatrix_p1({128, 2}, DEVICE);
+    Tensor<UnifiedPlaintext> encodeMatrix_p1({128, 2}, Datatype::DEVICE);
     for (size_t i = 0; i < 1000; i++){
         HE.evaluator->multiply_plain(rotatedIR({0, 0}),          encodeMatrix_p1({0, 0}), ct1_l);
         HE.evaluator->multiply_plain(rotatedIR({0, 32}), encodeMatrix_p1({0, 0}), ct1_r);
