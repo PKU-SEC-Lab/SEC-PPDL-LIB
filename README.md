@@ -1,6 +1,6 @@
 ![SEC-PPDL by PKU SEC Lab: homomorphic convolution followed by an MPC activation](docs/assets/sec-ppdl.jpg)
 
-# SEC-PPDL · Two-Party Private Neural Network Inference
+# SEC-PPDL: A High-Performance C++ Library for Two-Party Private Neural Network Inference on CPUs and GPUs
 
 Build private inference pipelines in C++ with encrypted linear layers and secure activations.
 
