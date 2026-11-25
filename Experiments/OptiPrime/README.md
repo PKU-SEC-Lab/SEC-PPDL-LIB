@@ -64,7 +64,7 @@ For the complete ImageNet experiment, link the `OptiPrime` target and use `<Opti
 
 Both parties ran on one AMD EPYC 9J14 host with 16 CPU workers per party. Linux `tc` shaped Docker loopback to 3,072 Mbit/s per direction and 0.3 ms RTT on LAN, or 352 Mbit/s and 40 ms RTT on WAN. Latency includes fresh per-image Ferret OT preprocessing and online inference through secure argmax. HE ran online. The timed interval excludes model setup, key exchange, OT planning and verification openings. Communication sums application bytes sent in both directions, in decimal GB.
 
-Cheetah used fixed-point weights and inputs with eight fractional bits, a 50-bit HE plaintext prime and a 60-bit MPC ring. OptiPrime used W4A8 convolutions, an 8-bit final classifier and approximate nonlinear operations. Its work ring was 26 bits for VGG-19 and 20 bits for the other models. The table reports per-image means over matched inputs. [Per-image records](measurements/cpu-inference.json)
+Cheetah used fixed-point weights and inputs with eight fractional bits, a 50-bit HE plaintext prime and a 60-bit MPC ring. OptiPrime used W4A8 convolutions, an 8-bit final classifier and integer nonlinear operations with randomized truncation. Its work ring was 26 bits for VGG-19 and 20 bits for the other models. The table reports per-image means over matched inputs. [Per-image records](measurements/cpu-inference.json)
 
 | Model | Network | Images | Cheetah (s) | OptiPrime (s) | Speedup | Cheetah (GB) | OptiPrime (GB) |
 |---|---|---:|---:|---:|---:|---:|---:|
@@ -80,12 +80,12 @@ The [project-page chart](https://jerryfishy.github.io/OptiPrime/#communication) 
 
 ### W4A8 integer-only results
 
-ResNet-18 on the same 3,000 distinct ImageNetV2 matched-frequency images across 970 classes. Both runs used approximate integer requantization with randomized truncation and an 8-bit final classifier.
+ResNet-18 on the same 3,000 distinct ImageNetV2 matched-frequency images across 970 classes. Both runs used integer requantization with randomized truncation and an 8-bit final classifier.
 
 | Execution | Top-1 | Top-5 |
 |---|---:|---:|
-| Approximate integer plaintext | 54.70% (1,641/3,000) | 77.50% (2,325/3,000) |
-| Approximate two-party encrypted inference | 54.60% (1,638/3,000) | 77.43% (2,323/3,000) |
+| Integer plaintext | 54.70% (1,641/3,000) | 77.50% (2,325/3,000) |
+| Two-party encrypted inference | 54.60% (1,638/3,000) | 77.43% (2,323/3,000) |
 
 ## Citation
 
