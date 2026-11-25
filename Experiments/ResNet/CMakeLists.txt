@@ -1,0 +1,7 @@
+add_executable(test_resnet EXCLUDE_FROM_ALL RunResNet.cpp)
+target_include_directories(test_resnet PRIVATE include)
+target_link_libraries(test_resnet PRIVATE Runtime)
+
+add_executable(test_resblock EXCLUDE_FROM_ALL RunBlock.cpp)
+target_include_directories(test_resblock PRIVATE include)
+target_link_libraries(test_resblock PRIVATE Runtime)

@@ -2,7 +2,7 @@
 
 This two-party BFV microbenchmark implements the symmetric high/low filter order and zero overlap from Section IV of the ICCAD 2023 Falcon paper. It compares the result with SEC-PPDL's actual depthwise OptiEncode operator. Each run uses reproducible public W4 kernels and A8 activations, random output masks, padding 1, and an independent spatial reference for every scalar result. The shape list comes from an exported ImageNet MobileNetV2 graph. [Falcon paper](https://arxiv.org/pdf/2308.13189)
 
-Run from the repository root with the CPU quantization experiment and testing enabled in CMake.
+Run from the repository root with the CPU experiments enabled in CMake (`-DSEC_PPDL_BUILD_EXPERIMENTS=ON`).
 
 ```bash
 cmake --build build --target test_falcon_depthwise -j8

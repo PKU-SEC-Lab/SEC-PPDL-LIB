@@ -1,378 +1,162 @@
-# 🔥SEC-LAB-PPDL Codebase 2026
+![SEC-PPDL by PKU SEC Lab: homomorphic convolution followed by an MPC activation](docs/assets/sec-ppdl.jpg)
 
-🔥🔥🔥An open-source Privacy-Preserving Deep Learning framework by SEC LAB (Led by Prof. Meng Li).🔥🔥🔥
+<h3 align="center">SEC-PPDL: A High-Performance Library for Two-Party Private Neural Network Inference on CPUs and GPUs</h3>
 
-- Multiple MPC and HE protocols
-- One-click CPU / GPU switching
-- One-click VOLE / IKNP OT primitive switching
+<p align="center">An easy-to-use hybrid FHE–MPC framework for high-performance private neural network inference.</p>
 
-See [cpp_coding_style.md](cpp_coding_style.md) for C++ coding conventions.
+<p align="center">
+  <a href="https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tree/v1.0"><img src="https://img.shields.io/badge/version-1.0-38689B" alt="Version: 1.0"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-29736B" alt="License: MIT"></a>
+  <a href="#current-support"><img src="https://img.shields.io/badge/Operator-examples-685394" alt="Operator examples"></a>
+  <a href="#experiments-and-results"><img src="https://img.shields.io/badge/Experiment-results-9A591F" alt="Experiment results"></a>
+  <a href="https://mengli.me/"><img src="https://img.shields.io/badge/PKU-SEC_Lab-9B354C" alt="PKU SEC Lab homepage"></a>
+</p>
 
-## 1. Install Dependencies
+## About
 
-Build the pinned CPU dependencies and, for GPU support, Phantom. [Dependency instructions](Extern/README.md)
+SEC-PPDL is an open-source C++ library for private neural network inference using a hybrid FHE–MPC approach. It combines homomorphic encryption for convolution and matrix multiplication with secure two-party protocols for activations and other nonlinear operations.
 
-## 2. Build
+You can integrate individual layers into a C++ application, check their outputs against plaintext, or measure latency and network traffic for ResNet, VGG, and MobileNetV2. The same OptiEncode interface supports dense and depthwise convolution on CPUs and CUDA GPUs. [Operator API](#usage) · [Experiments and results](#experiments-and-results)
+
+## Contents
+
+1. [News](#news)
+2. [Current support](#current-support)
+3. [Quick start](#quick-start)
+4. [Operator API](#usage)
+5. [Repository layout](#repository-layout)
+6. [Experiments and results](#experiments-and-results)
+7. [Publications](#publications)
+8. [License](#license) and [citation](#citation)
+9. [Contributing](CONTRIBUTING.md)
+
+## News
+
+- 📦 **2026-11-26 · SEC-PPDL 1.0.** The MIT-licensed release includes CPU and CUDA operators, two-party checks and end-to-end experiments. [Version 1.0](https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tree/v1.0)
+- 📄 **MICRO 2026 · OptiPrime.** OptiEncode convolution runs on CPU and CUDA. A subsequent extension supports packed depthwise convolution for MobileNetV2. [Project page](https://jerryfishy.github.io/OptiPrime/) · [Depthwise layout](Experiments/OptiPrime/depthwise.md)
+
+## Current support
+
+| Component | Available in the library | API | Run an example |
+|---|---|---|---|
+| Encrypted convolution | OptiEncode dense and multiplier-one depthwise convolution on CPU and CUDA; Cheetah and block-circulant convolution | [OptiEncode](Layer/LinearLayer/include/LinearLayer/ConvOptiEncode.h) · [Other convolutions](Layer/LinearLayer/include/LinearLayer/Conv.h) | [OptiEncode convolution](#quick-start) |
+| Linear algebra | Packed matrix multiplication and block-circulant linear layers | [Linear](Layer/LinearLayer/include/LinearLayer/Linear.h) · [CirLinear](Layer/LinearLayer/include/LinearLayer/CirLinear.h) | [Block-circulant layers](Experiments/PrivCirNet/README.md#build-the-checks) |
+| Secure nonlinear operators | ReLU, pooling, fixed-point comparison, selection and truncation | [Layers](Layer/NonlinearLayer/include/NonlinearLayer) · [Fixed-point protocols](Operator/NonlinearOperator/include/NonlinearOperator/FixPoint.h) | [Fixed-point comparison](#two-party-operator-checks) |
+| Two-party runtime | HE key setup, IKNP or Ferret OT, communication counters | [Runtime](Runtime/include/Runtime/Primitive.h) | [Two-party setup](#two-party-operator-checks) |
+
+## Quick start
+
+From a fresh clone, follow the [dependency build instructions](Extern/README.md). These commands build the CPU library, then enable a two-party convolution check with generated inputs.
 
 ```bash
-cmake -S . -B build          # add -DUSE_HE_GPU=ON for GPU support
-cmake --build build -j
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j8
+cmake -S . -B build -DBUILD_TESTING=ON
+cmake --build build --target test_optiencode_conv -j8
+ctest --test-dir build -R '^optiencode_conv$' --output-on-failure
 ```
 
-## 3. Run Tests
+Use `-DSEC_PPDL_BUILD_EXPERIMENTS=ON` for end-to-end models and benchmarks. Use a separate `build-gpu/` directory with `-DUSE_HE_GPU=ON` after installing the [GPU dependency](Extern/README.md#gpu-dependency).
 
-Tests use a two-party protocol. Start **Server** (`r=1`) before **Client** (`r=2`) with the same port.
+### Two-party operator checks
 
-### [PrivCirNet](https://proceedings.neurips.cc/paper_files/paper/2024/file/ca9873918aa72e9033041f76e77b5c15-Paper-Conference.pdf)
-
-`test_cir_linear` and `test_cir_conv` are reference implementations for [PrivCirNet]([https://arxiv.org/abs/2407.13418]([https://proceedings.neurips.cc/paper_files/paper/2024/hash/ca9873918aa72e9033041f76e77b5c15-Abstract-Conference.html](https://proceedings.neurips.cc/paper_files/paper/2024/file/ca9873918aa72e9033041f76e77b5c15-Paper-Conference.pdf))), testing Block Circulant Linear and Convolution layers respectively. More projects will be added.
+With `BUILD_TESTING=ON`, build the checks from the repository root.
 
 ```bash
-# Block Circulant Linear
-./build/Test/test_cir_linear r=1 p=1234   # Terminal 1 (Server)
-./build/Test/test_cir_linear r=2 p=1234   # Terminal 2 (Client)
-
-# Block Circulant Convolution
-./build/Test/test_cir_conv r=1 p=1234     # Terminal 1 (Server)
-./build/Test/test_cir_conv r=2 p=1234     # Terminal 2 (Client)
+cmake --build build --target test_linear_operator test_fixpoint -j8
 ```
 
-### [OptiEncode convolution](https://jerryfishy.github.io/OptiPrime/)
+Start the server in one terminal, then run its client in a second terminal on the same machine.
 
-OptiEncode is the CPU/GPU encrypted convolution protocol from OptiPrime (MICRO 2026). For end-to-end quantized inference on ResNet, VGG, or MobileNetV2, see the [experiment guide](Experiments/OptiPrime/README.md) and [network definitions](Experiments/OptiPrime/imagenet/architecture.py). [Paper](https://arxiv.org/abs/2609.16898) · [Citation](#citation)
+| Check | Server | Client |
+|---|---|---|
+| Element-wise square and product | `./build/Test/test_linear_operator r=1 p=32000` | `./build/Test/test_linear_operator r=2 p=32000` |
+| Fixed-point comparison with a constant | `./build/Test/test_fixpoint r=1 p=32001` | `./build/Test/test_fixpoint r=2 p=32001` |
 
-From the repository root, run the CPU suite after building with `BUILD_TESTING=ON` (the default). It checks the encoding algebra, two-party convolution against a clear reference, default Galois keys, and FaceResNet integration. CTest starts both parties automatically.
+## Usage
 
-```bash
-ctest --test-dir build --output-on-failure -R '^optiencode_'
-```
-
-For the GPU convolution check, first install the [GPU dependency](Extern/README.md#gpu-dependency) and use the GPU build directory.
-
-```bash
-cmake -S . -B build-gpu -DUSE_HE_GPU=ON -DBUILD_TESTING=ON
-cmake --build build-gpu --target test_optiencode_conv -j8
-ctest --test-dir build-gpu --output-on-failure -R '^optiencode_gpu_conv$'
-```
-
-For the post-publication MobileNetV2 depthwise extension, set `options.depthwise = true` with compact `[channels, 1, kernel, kernel]` weights. [Depthwise derivation](Experiments/OptiPrime/depthwise.md)
-
-To call the operator from C++, link the CMake target `LinearLayer`. Each party supplies its additive input share. The server supplies OIHW weights and per-channel bias modulo the plaintext modulus. The client passes zero tensors of the same shapes. For a power-of-two plaintext modulus, set `options.ciphertext_inverse_normalization = true` on both parties. [Public header](Layer/LinearLayer/include/LinearLayer/ConvOptiEncode.h) · [Two-party example](Test/src/TestOptiEncodeConv.cpp)
+Link `LinearLayer` in your CMake application. On each party, supply an initialized HE context and a local input share. The server supplies OIHW weights and per-channel bias. The client supplies zero tensors of the same shapes.
 
 ```cpp
 #include <LinearLayer/ConvOptiEncode.h>
 
 he.GenerateNewKey(LinearLayer::Conv2DOptiEncode::GaloisElements(he.polyModulusDegree));
 LinearLayer::OptiEncodeOptions options;
-options.threads = 4;
-LinearLayer::Conv2DOptiEncode conv(height, stride, padding, weight, bias, &he, options);
+options.threads = 16;
+LinearLayer::Conv2DOptiEncode conv(height, stride, padding, weights, bias, &he, options);
 auto output_share = conv(input_share);
 ```
 
-### FaceResNet64
+For a power-of-two plaintext modulus, set `options.ciphertext_inverse_normalization = true` on both parties. For depthwise convolution, set `options.depthwise = true` and supply weights shaped `[channels, 1, kernel, kernel]`. [Two-party example and plaintext reference](Test/support/OptiEncodeCases.h)
 
-`Model::FaceResNet64` verifies a pair of aligned RGB face crops with shape
-`[3, 64, 64]` in CHW order. Supply pixels in `[-1, 1]` as Q12 additive shares
-modulo `2^37`. The model uses `ell=37` and `k=12` from the
-[OpenCheetah release scripts](https://github.com/Alibaba-Gemini-Lab/OpenCheetah/blob/f71d4d49ffde81701fc3cc2d887fae62381fb472/scripts/common.sh#L51-L54).
-Set the secure ReLU ring to 37 bits and use a BFV plaintext modulus above
-`2^33`.
+## Repository layout
 
-| Backbone | Stem | Residual stage depths | Stage widths | Map before global average pooling |
-| --- | --- | --- | --- | --- |
-| `Backbone::ResNet18` | 7×7 convolution, stride 2, then 3×3 MaxPool, stride 2 | 2, 2, 2, 2 | 64, 128, 256, 512 | 2×2 |
-| `Backbone::ResNet20` | 3×3 convolution, stride 1 | 3, 3, 3 | 16, 32, 64 | 16×16 |
-| `Backbone::ResNet32` | 3×3 convolution, stride 1 | 5, 5, 5 | 16, 32, 64 | 16×16 |
-| `Backbone::ResNet34` | 7×7 convolution, stride 2, then 3×3 MaxPool, stride 2 | 3, 4, 6, 3 | 64, 128, 256, 512 | 2×2 |
-| `Backbone::Compact` | 3×3 convolution, stride 1 | 1, 1, 1 | 16, 32, 64 | 16×16 |
+| Directory | What to look for |
+|---|---|
+| [Operator/](Operator), [Layer/](Layer) | Encoding and fixed-point primitives, plus callable layers such as convolution, ReLU and pooling. Each module exposes its public headers under `include/`. |
+| [HE/](HE), [OT/](OT), [Runtime/](Runtime) | Encryption backends, oblivious transfer protocols and shared two-party setup. |
+| [Datatype/](Datatype), [Utils/](Utils), [Extern/](Extern) | Tensor types, networking and threading utilities, and pinned third-party dependencies. |
+| [Test/](Test) | Operator correctness checks and their plaintext references. |
+| [Experiments/](Experiments) | Paper-specific guides, end-to-end models, benchmarks and measurement summaries. |
 
-The ResNet backbones use basic residual blocks and ordinary ReLU. The first
-block of each stage after stage 1 downsamples with a stride-two convolution
-and a 1×1 projection shortcut. ResNet20 and ResNet32 use the CIFAR-style stem
-and three stages. After global average pooling, a learned projection
-replaces the classification head and produces a 128-dimensional embedding.
-`Forward` returns an embedding share with coordinates clipped to `[-1, 1]`.
-Both parties call `Verify` with the same threshold in `(0, 1]` and receive one
-match bit. The cosine comparison widens its three shared dot products to
-64 bits for squaring, rounds the squared threshold up to a multiple of
-`1/4096`, and rejects zero embeddings. Calibrate the threshold with the
-encoded model and its embedding head.
+See the [contributor guide](CONTRIBUTING.md#directory-ownership) for file placement and CMake conventions.
 
-Convolutions on `64×64` feature maps use Cheetah with partitions selected by
-the total number of input and output ciphertexts. Smaller feature maps use
-`CirConv2D` with `block_size=1`, including the `1×1` embedding projection.
-The single-row `CirLinearNest` path uses the same projection with matrix
-weights in input-channel by output-channel order. Use a BFV polynomial
-degree of at least 8192 for this model.
+<a name="performance"></a>
 
-On the server, fold any evaluation-mode BatchNorm into the preceding
-convolution and pass the resulting FP32 tensors to `EncodeWeights`.
-It encodes kernels as Q12 and biases as Q24 for secure inference. Use
-`ConvolutionShapes(backbone)` for the OIHW shapes and ordering. The order is
-stem, each residual block's two main convolutions followed by its shortcut
-if present, and the embedding projection. Pass the same backbone to both
-constructors. Q24 convolution accumulators must fit the signed 37-bit ring
-and have magnitude below half the BFV modulus, or a quarter with M&M.
+## Experiments and results
 
-#### Run the baseline and ours
+| Experiment | What is measured |
+|---|---|
+| [OptiPrime ImageNet](Experiments/OptiPrime/README.md#performance) | CPU LAN/WAN latency, bidirectional traffic, and measured ResNet-18 integer plaintext and encrypted top-1/top-5 accuracy |
+| [FaceResNet64](Experiments/FaceResNet/README.md) | Single-image embedding and two-image verification; fixed-point backbones and Compact W4A8 drivers |
+| [PrivCirNet](Experiments/PrivCirNet/README.md) | Block-circulant linear and convolution outputs checked against plaintext; linear-layer rotation and multiplication counts and timings |
+| [Operator benchmarks](Experiments/Benchmarks/README.md) | Per-call timing and traffic for encrypted convolutions, and block-circulant matrix operation counts |
+| [Falcon depthwise comparison](Experiments/OptiPrime/falcon/README.md) | Layer-level packing, operation counts and MobileNetV2 comparison |
 
-Build the CPU test from the repository root after installing the dependencies.
+Each experiment documents its own network settings, timing boundaries and units.
 
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DUSE_HE_GPU=OFF
-cmake --build build --target test_face_resnet -j
-```
+## Publications
 
-To run both parties on one host with Python 3.11 or later, use
-`Test/run_face_resnet.py`. Select the backbone with `--backbone 18`,
-`--backbone 20`, `--backbone 32`, or `--backbone 34`.
+### MICRO 2026 · OptiPrime
 
-```bash
-# Measure and compare the two protocols over loopback.
-python3 Test/run_face_resnet.py --backbone 18 --protocol both
+We implement OptiEncode convolution on CPUs and GPUs. In the ImageNet experiment, we combine it with MPC activations and measure end-to-end latency and communication.
 
-# Measure the hybrid protocol at 400 Mb/s per direction and 20 ms RTT.
-python3 Test/run_face_resnet.py --backbone 34 --protocol hybrid --wan
-```
+> Jiangrui Yu, Ye Yu, Si Chen, Chenqi Lin, Wenxuan Zeng, Junfeng Fan, Mingyu Gao, and Meng Li. **OptiPrime: Optimizing Private Inference through Protocol-Hardware Co-design.** MICRO 2026.
 
-The script uses dense FP32 fixtures, Ferret VOLE, and 16 HE workers in
-hybrid mode. It saves each party's log and a `summary.json` with latency and
-communication breakdowns in a fresh run directory. Use `--binary` for a
-non-default build, `--output-dir` to choose where runs are saved,
-and `--server-cpus` and `--client-cpus` to pin each party with Linux
-`taskset`. The WAN proxy shares the configured bandwidth per direction
-across all three connections. Use a different `--port` for concurrent runs.
+[Paper](https://arxiv.org/abs/2609.16898) · [Code](Layer/LinearLayer/include/LinearLayer/ConvOptiEncode.h) · [Reproduce](Experiments/OptiPrime/README.md#quick-start) · [BibTeX](#cite-optiprime) · [Project](https://jerryfishy.github.io/OptiPrime/)
 
-For separate hosts or manual setup, start each server and client in
-separate terminals.
+### USENIX Security 2025 · Breaking the Layer Barrier
 
-Use the same port and flags on both sides. Select ResNet18, ResNet20, ResNet32, or ResNet34 with
-`backbone=18`, `backbone=20`, `backbone=32`, or `backbone=34`. The default
-`backbone=0` selects the compact model. Add `dense=1` on both sides to use
-synthetic FP32 weights with every convolution and projection coefficient
-nonzero after Q12 encoding. The benchmark uses identical weights and crops
-for both protocol configurations.
+We study how to combine CKKS and MPC for private Transformer inference. Here we provide CKKS encoding primitives and a two-party check for element-wise multiplication.
 
-```bash
-# Baseline: all convolutions use the original Cheetah partition strategy.
-# Ring/field conversion and truncation are exact.
-./build/Test/test_face_resnet r=1 p=1234 full=1 backbone=18 baseline=1 mm=0
-./build/Test/test_face_resnet r=2 p=1234 full=1 backbone=18 baseline=1 mm=0
+> Tianshi Xu, Wen-jie Lu, Jiangrui Yu, Yi Chen, Chenqi Lin, Runsheng Wang, and Meng Li. **Breaking the Layer Barrier: Remodeling Private Transformer Inference with Hybrid CKKS and MPC.** USENIX Security 2025.
 
-# Ours: mixed Cheetah/CirConv with M&M conversion and fused truncation.
-./build/Test/test_face_resnet r=1 p=1240 full=1 backbone=18 baseline=0 mm=1
-./build/Test/test_face_resnet r=2 p=1240 full=1 backbone=18 baseline=0 mm=1
-```
+[Paper](https://www.usenix.org/conference/usenixsecurity25/presentation/xu-tianshi) · [Code](Operator/LinearOperator/include/LinearOperator/Polynomial.h) · [Reproduce (operator check)](#two-party-operator-checks) · [BibTeX](#cite-breaking)
 
-Use `baseline=0 mm=0` on both sides to measure the mixed convolution
-backend with exact conversion and truncation. Omit `full=1` to run the
-operator checks alone.
+### NeurIPS 2024 · PrivCirNet
 
-#### Run with VOLE-style OT
+We implement block-circulant linear and convolution layers and check their outputs against plaintext. We provide training code and pretrained models in the PrivCirNet project.
 
-Use `vole=1` to select Ferret. Set `checks=0` for benchmarking so the
-standalone operator checks do not consume preprocessed pairs before the
-measured workload. The full test still verifies a matching pair and a
-nonmatching pair. Use a fresh working directory for each two-party session
-when measuring cold-start setup.
+> Tianshi Xu, Lemeng Wu, Runsheng Wang, and Meng Li. **PrivCirNet: Efficient Private Inference via Block Circulant Transformation.** NeurIPS 2024.
 
-```bash
-# Cheetah baseline
-./build/Test/test_face_resnet r=1 p=1234 full=1 backbone=18 baseline=1 mm=0 vole=1 checks=0
-./build/Test/test_face_resnet r=2 p=1234 full=1 backbone=18 baseline=1 mm=0 vole=1 checks=0
+[Paper](https://proceedings.neurips.cc/paper_files/paper/2024/hash/ca9873918aa72e9033041f76e77b5c15-Abstract-Conference.html) · [Code](Layer/LinearLayer/src/CirLinear.cpp) · [Reproduce (operators)](Experiments/PrivCirNet/README.md) · [BibTeX](#cite-privcirnet) · [Project and models](https://github.com/Tianshi-Xu/PrivCirNet)
 
-# Ours
-./build/Test/test_face_resnet r=1 p=1240 full=1 backbone=18 baseline=0 mm=1 vole=1 checks=0
-./build/Test/test_face_resnet r=2 p=1240 full=1 backbone=18 baseline=0 mm=1 vole=1 checks=0
-```
+### Additional implementations
 
-Each process prints its own bytes sent across two verification pairs. For
-each metric, add the two parties' byte counts and divide by `2 × 2^20` to
-obtain bidirectional MiB per pair. Each pair runs two model forwards. The
-measurement starts after setup and the operator checks. Convolution
-communication counts the ciphertext exchange. Linear-layer communication
-also includes modulus conversion and truncation. Verification communication
-includes the full forward and secure match.
+- **BumbleBee (NDSS 2025)** — Matrix multiplication on secret-shared inputs, with HE for the cross terms. [Paper](https://doi.org/10.14722/ndss.2025.230057) · [Implementation](Layer/LinearLayer/src/Linear.cpp)
+- **BOLT (IEEE S&P 2024)** — Packed linear layer. [Paper](https://doi.org/10.1109/SP54263.2024.00130) · [Implementation](Layer/LinearLayer/src/Linear.cpp)
+- **Falcon (ICCAD 2023)** — Reproduction of the depthwise convolution packing scheme, with a MobileNetV2 comparison. [Paper](https://arxiv.org/abs/2308.13189) · [Reproduction](Experiments/OptiPrime/falcon/README.md)
+- **Cheetah (USENIX Security 2022)** — Encrypted convolution used as the baseline in our inference experiments. [Paper](https://www.usenix.org/conference/usenixsecurity22/presentation/huang-zhicong) · [Implementation](Layer/LinearLayer/src/ConvCheetah.cpp)
 
-Each party reports session setup, local model packing, and the duration of
-each verification separately. Use the slower party's time for each pair.
-The verification timer includes both forwards, secure matching, and any
-OT refill triggered during the request. The test also reports the average
-model forward time across the four images in the two requests.
+## License
 
-For Ferret, the test counts base setup and initial pair generation once per
-session. It also counts any random COT generation triggered during
-verification as OT refill traffic. Online communication counts the
-choice adjustments, OT payloads, and ciphertext exchanges. The setup
-and refill counters are separate from the online counters.
-
-#### VOLE communication with 37-bit shares and Q12
-
-The CPU loopback runs use three OT threads, BFV degree 8192, and a 50-bit
-plaintext modulus. Each pair uses two forwards and one private cosine
-comparison. The table reports bidirectional MiB per verification pair,
-averaged over two pairs. The baseline uses this repository's Cheetah
-convolution path with input-ciphertext partition cost and full output
-ciphertext serialization. The upstream OpenCheetah implementation also
-[truncates the output ciphertext and removes unused coefficients](https://github.com/Alibaba-Gemini-Lab/OpenCheetah/blob/f71d4d49ffde81701fc3cc2d887fae62381fb472/include/gemini/cheetah/hom_conv2d_ss.cc#L696-L711).
-
-| Backbone and protocol | Convolution ciphertexts | Online conversion and truncation | Other online verification | Online total | Offline OT refill |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| ResNet18, Cheetah baseline | 6706.55 | 102.72 | 45.09 | 6854.36 | 5.80 |
-| ResNet18, ours | 386.09 | 12.93 | 45.09 | 444.12 | 1.58 |
-| ResNet32, Cheetah baseline | 3595.83 | 675.29 | 169.79 | 4440.91 | 34.81 |
-| ResNet32, ours | 1413.33 | 92.40 | 169.79 | 1675.52 | 7.38 |
-
-Other online verification includes ReLU, pooling, embedding clipping, and
-cosine matching. Each cold session exchanges another 8.61 MiB for Ferret
-setup and initial pair generation and 60.70 MiB for HE key exchange.
-
-The convolution ciphertext counts below are per model forward.
-
-| Backbone and protocol | Input ciphertexts | Output ciphertexts |
-| --- | ---: | ---: |
-| ResNet18, Cheetah baseline | 41 | 6664 |
-| ResNet18, ours | 145 | 241 |
-| ResNet32, Cheetah baseline | 202 | 3393 |
-| ResNet32, ours | 660 | 753 |
-
-In the Cheetah baseline, the last two ResNet18 stages have 256 and 512 output
-channels. Their partitions, including projection shortcuts, account for
-5120 output ciphertexts per forward. In the hybrid path, a 3×3 CirConv on a
-32×32 feature map in ResNet32 rounds the padded spatial size from 34 to 64.
-With BFV degree 8192 and block size 1, one ciphertext carries one channel.
-The same configuration carries 16 channels when the input
-map is 8×8, as in ResNet18.
-
-#### ResNet18 and ResNet34 latency
-
-The runs used 64×64 inputs, Ferret, and three OT threads
-per party on an AMD EPYC 9K65 host. Each row averages two requests and uses
-the slower party's time for each request. The WAN proxy applied a shared
-400 Mb/s limit in each direction and 10 ms one-way delay across the three
-protocol connections.
-
-| Backbone | Protocol and request | Synthetic weights | CPU loopback | Simulated WAN |
-| --- | --- | --- | ---: | ---: |
-| ResNet18 | Cheetah baseline, verification pair | Sparse | 79.0 s | — |
-| ResNet18 | Hybrid with M&M, verification pair | Sparse | 16.0 s | 39.7 s |
-| ResNet18 | Hybrid with M&M, one secure embedding | Sparse | — | 20.3 s |
-| ResNet34 | Hybrid with M&M, verification pair | Sparse | 24.3 s | 63.3 s |
-| ResNet34 | Hybrid with M&M, one secure embedding | Sparse | — | 31.7 s |
-| ResNet34 | Hybrid with M&M, one secure embedding | Dense | — | 95.6 s |
-
-WAN session setup and server-side model packing took 4.6 s and 2.8 s for
-ResNet18 and 5.5 s and 5.0 s for ResNet34 before timed pair verification.
-Pair verification runs two model forwards and the private match. The
-single-image measurement times one model forward through the embedding head.
-The dense latency fixture fills the otherwise-zero kernels with alternating
-Q12 values of ±1 and keeps the sparse fixture's nonzero coefficients. The
-dense and sparse forward runs sent the same number of bytes in each direction.
-
-#### Dense-weight WAN comparison
-
-All four backbones used 64×64 inputs, `full=1 dense=1 vole=1 checks=0 baseline=0 mm=1`,
-and the same 400 Mb/s per direction, 20 ms RTT WAN proxy. Feature maps at
-64×64 used Cheetah. Every CirConv layer used `block_size=1`. Setup and weight
-packing are outside the timed requests.
-
-| Backbone | Forward per image | End-to-end per verification pair | Online MiB per pair | Offline OT refill MiB per pair |
-| --- | ---: | ---: | ---: | ---: |
-| ResNet18 | 56.6 s | 114.2 s | 444.12 | 1.58 |
-| ResNet20 (CIFAR-style) | 58.7 s | 118.4 s | 1066.69 | 4.22 |
-| ResNet32 (CIFAR-style) | 90.3 s | 181.6 s | 1675.52 | 7.38 |
-| ResNet34 | 96.3 s | 193.5 s | 665.78 | 2.37 |
-
-Each run completed two verification requests with synthetic FP32 weights,
-one matching and one nonmatching. Forward times average the four sequential
-model calls. Pair times include both forwards, private matching, and any
-OT refill triggered by the request. Byte totals are bidirectional.
-
-CPU inference in the hybrid mode defaults to `he_threads=16`. This enables
-parallel Cheetah output tiles and CirConv input rotations and giant-step
-groups. Pass `he_threads=1` to reproduce the single-worker hybrid timings.
-The Cheetah baseline uses a single HE worker. Both modes use three OT
-threads per party. On the same WAN workload, with 16 physical cores
-assigned to the server on one socket, all four backbones came in below
-50 seconds per forward.
-
-| Backbone | Forward per image, 1 HE worker | Forward per image, 16 HE workers | Verification pair, 16 HE workers |
-| --- | ---: | ---: | ---: |
-| ResNet18 | 56.6 s | 19.9 s | 40.8 s |
-| ResNet20 (CIFAR-style) | 58.7 s | 30.9 s | 62.8 s |
-| ResNet32 (CIFAR-style) | 90.3 s | 49.2 s | 99.4 s |
-| ResNet34 | 96.3 s | 33.5 s | 68.0 s |
-
-Both configurations exchanged identical byte totals in each direction.
-
-#### Dense-weight Cheetah baseline comparison
-
-The baseline uses `full=1 dense=1 vole=1 checks=0 baseline=1 mm=0`.
-It uses the repository's Cheetah partitions and full output ciphertexts.
-The baseline was measured over CPU loopback. The hybrid rows use the WAN
-runs above. Communication is bidirectional MiB per verification pair.
-
-| Backbone | Protocol | Convolution ciphertexts | Online conversion and truncation | Other online verification | Online total | Offline OT refill |
-| --- | --- | ---: | ---: | ---: | ---: | ---: |
-| ResNet18 | Cheetah baseline | 6706.55 | 102.72 | 45.09 | 6854.36 | 5.80 |
-| ResNet18 | Hybrid | 386.09 | 12.93 | 45.09 | 444.12 | 1.58 |
-| ResNet20 | Cheetah baseline | 2499.58 | 432.85 | 105.67 | 3038.10 | 22.15 |
-| ResNet20 | Hybrid | 901.21 | 59.81 | 105.67 | 1066.69 | 4.22 |
-| ResNet32 | Cheetah baseline | 3595.83 | 675.29 | 169.79 | 4440.91 | 34.81 |
-| ResNet32 | Hybrid | 1413.33 | 92.40 | 169.79 | 1675.52 | 7.38 |
-| ResNet34 | Cheetah baseline | 13012.00 | 156.91 | 59.43 | 13228.34 | 8.97 |
-| ResNet34 | Hybrid | 586.14 | 20.21 | 59.43 | 665.78 | 2.37 |
-
-End-to-end online communication improves by 15.43×, 2.85×, 2.65×,
-and 19.87× for ResNet18, ResNet20, ResNet32, and ResNet34, respectively.
-Each cold session also exchanges 8.61 MiB for Ferret initialization and
-60.70 MiB for HE key exchange in either configuration.
-
-Cheetah baseline loopback latency averaged 106.8, 146.0, 228.1, and 190.2
-seconds per verification pair for those four backbones, respectively.
-
-#### Historical compact-backbone communication
-
-The tables below are historical measurements for the compact backbone with
-60-bit shares, Q8 precision, and clipped hidden activations. The CPU loopback
-benchmarks used three OT threads, BFV degree 8192, and a 50-bit plaintext
-modulus. The IKNP table reports bidirectional MiB per verification pair.
-
-| Configuration | Convolution ciphertexts | Conversion and truncation | Linear layers total | End-to-end verification |
-| --- | ---: | ---: | ---: | ---: |
-| Cheetah baseline (`baseline=1 mm=0`) | 1403.32 | 1648.67 | 3051.99 | 4287.04 |
-| Mixed convolutions, exact conversion (`baseline=0 mm=0`) | 389.09 | 1648.67 | 2037.76 | 3272.81 |
-| Ours (`baseline=0 mm=1`) | 389.09 | 36.59 | 425.68 | 1660.73 |
-| Ours reduction from baseline | 72.3% | 97.8% | 86.1% | 61.3% |
-
-With Ferret VOLE-style OT, setup is reported once per cold session. All other
-rows are bidirectional MiB per verification pair, averaged across two pairs.
-
-| Measurement | Cheetah baseline | Ours |
-| --- | ---: | ---: |
-| Ferret OT setup and initial pair generation per session | 8.61 | 8.61 |
-| Other setup per session (HE key exchange) | 60.70 | 60.70 |
-| Offline OT refill during verification | 13.71 | 5.54 |
-| Online convolution ciphertexts | 1403.32 | 389.09 |
-| Online linear layers including conversion and truncation | 1610.98 | 418.27 |
-| Online end-to-end verification | 1751.75 | 559.04 |
-| Verification including OT refill | 1765.46 | 564.58 |
-
-Ours reduces online linear-layer communication by 74.0% and online
-end-to-end verification communication by 68.1% relative to the VOLE baseline.
-
-#### Enable M&M in an application
-
-Pass `use_mm_conversion=true` to the `FaceResNet64` constructor on both
-parties to enable M&M-style bounded modulus conversion. This path uses
-one OT per input value and fuses field-to-ring conversion with truncation
-using one correlated OT per output value. Fused truncation can differ from
-exact truncation by one Q12 unit per convolution. The default path uses
-exact truncation.
+SEC-PPDL is distributed under the [MIT License](LICENSE). Third-party dependencies and files with their own notices retain their respective licenses. [Dependencies](Extern/README.md) · [ArgMapping license](Utils/include/Utils/ArgMapping/LICENSE)
 
 ## Citation
 
-Please cite PrivCirNet and Breaking the Layer Barrier when using SEC-PPDL. If you use its OptiEncode convolution implementation, please also cite OptiPrime.
+If you use SEC-PPDL in your research, please cite all three papers: PrivCirNet, Breaking the Layer Barrier, and OptiPrime.
+
+<a name="cite-privcirnet"></a>
 
 ```bibtex
 @article{xu2024privcirnet,
@@ -383,7 +167,11 @@ Please cite PrivCirNet and Breaking the Layer Barrier when using SEC-PPDL. If yo
   pages={111802--111831},
   year={2024}
 }
+```
 
+<a name="cite-breaking"></a>
+
+```bibtex
 @inproceedings{xu2025breaking,
   title={Breaking the layer barrier: Remodeling private transformer inference with hybrid {CKKS} and {MPC}},
   author={Xu, Tianshi and Lu, Wen-jie and Yu, Jiangrui and Chen, Yi and Lin, Chenqi and Wang, Runsheng and Li, Meng},
@@ -391,7 +179,11 @@ Please cite PrivCirNet and Breaking the Layer Barrier when using SEC-PPDL. If yo
   pages={2653--2672},
   year={2025}
 }
+```
 
+<a name="cite-optiprime"></a>
+
+```bibtex
 @inproceedings{yu2026optiprime,
   title={{OptiPrime}: Optimizing Private Inference through Protocol-Hardware Co-design},
   author={Yu, Jiangrui and Yu, Ye and Chen, Si and Lin, Chenqi and Zeng, Wenxuan and Fan, Junfeng and Gao, Mingyu and Li, Meng},

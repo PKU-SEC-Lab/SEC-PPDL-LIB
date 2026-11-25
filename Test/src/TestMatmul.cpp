@@ -1,5 +1,5 @@
 #include <LinearLayer/Linear.h>
-#include <Model/ResNet.h>
+#include <Utils/ArgMapping/ArgMapping.h>
 #include <fstream>
 #include <iostream>
 

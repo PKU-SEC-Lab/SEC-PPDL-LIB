@@ -2,7 +2,7 @@
 #include <LinearLayer/ConvOptiEncode.h>
 #include <NonlinearLayer/ReLU.h>
 #include <NonlinearLayer/Pool.h>
-#include "Primitive.h"
+#include <Runtime/Primitive.h>
 #include <NonlinearOperator/FixPoint.h>
 using namespace LinearLayer;
 using namespace NonlinearLayer;

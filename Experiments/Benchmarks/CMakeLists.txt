@@ -1,0 +1,13 @@
+if(USE_HE_GPU)
+    add_executable(test_HE EXCLUDE_FROM_ALL HE.cpp)
+    target_link_libraries(test_HE PRIVATE HE)
+    add_executable(testFFN EXCLUDE_FROM_ALL FFN.cpp)
+    target_link_libraries(testFFN PRIVATE HE Datatype)
+endif()
+
+add_executable(bench_optiencode EXCLUDE_FROM_ALL OptiEncode.cpp)
+add_executable(bench_cir_linear EXCLUDE_FROM_ALL CirLinear.cpp)
+foreach(target bench_optiencode bench_cir_linear)
+    target_link_libraries(${target} PRIVATE LinearLayer)
+    target_include_directories(${target} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../Test/support)
+endforeach()

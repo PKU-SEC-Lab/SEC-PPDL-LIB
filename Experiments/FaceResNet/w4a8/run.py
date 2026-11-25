@@ -9,8 +9,8 @@ import subprocess
 import sys
 import tempfile
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "Test"))
-from run_face_resnet import start_wan_proxy
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools"))
+from wan import start_wan_proxy
 
 
 async def run(args, directory):

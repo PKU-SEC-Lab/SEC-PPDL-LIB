@@ -1,0 +1,3 @@
+add_library(Runtime INTERFACE)
+target_include_directories(Runtime INTERFACE include)
+target_link_libraries(Runtime INTERFACE LinearLayer NonlinearLayer)
