@@ -14,7 +14,7 @@
 
 ## About
 
-SEC-PPDL is an open-source C++ library from PKU SEC Lab for evaluating neural networks while keeping the client’s input and the server’s model private. It combines homomorphic encryption for convolution and matrix multiplication with secure two-party protocols for activations and other nonlinear operations.
+SEC-PPDL is an open-source C++ library for private neural network inference using a hybrid FHE–MPC approach. It combines homomorphic encryption for convolution and matrix multiplication with secure two-party protocols for activations and other nonlinear operations.
 
 You can integrate individual layers into a C++ application, check their outputs against plaintext, or measure latency and network traffic for ResNet, VGG, and MobileNetV2. The same OptiEncode interface supports dense and depthwise convolution on CPUs and CUDA GPUs. [Operator API](#usage) · [Experiments and results](#experiments-and-results)
 
