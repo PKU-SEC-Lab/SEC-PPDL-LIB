@@ -2,7 +2,7 @@
 
 <h3 align="center">SEC-PPDL: A High-Performance Library for Two-Party Private Neural Network Inference on CPUs and GPUs</h3>
 
-<p align="center">Start with one encrypted convolution, then run a full ResNet and measure what the two parties exchange.</p>
+<p align="center">Build and benchmark private inference protocols, from a single encrypted layer to a complete neural network.</p>
 
 <p align="center">
   <a href="https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tree/v1.0"><img src="https://img.shields.io/badge/version-1.0-38689B" alt="Version: 1.0"></a>
@@ -14,9 +14,9 @@
 
 ## About
 
-SEC-PPDL is the C++ library we use at PKU SEC Lab to run a neural network when one party holds the input and the other holds the model. It combines homomorphic encryption (HE) for linear layers with secure multiparty computation (MPC) for operations such as ReLU and truncation.
+SEC-PPDL is an open-source C++ library from PKU SEC Lab for evaluating neural networks while keeping the client’s input and the server’s model private. It combines homomorphic encryption for convolution and matrix multiplication with secure two-party protocols for activations and other nonlinear operations.
 
-You can link an individual layer into your own application or run the models in `Experiments/`. Our ResNet, VGG and MobileNetV2 experiments use the same two-party runtime to measure inference latency and communication. [Operator API](#usage) · [Experiments and results](#experiments-and-results)
+You can integrate individual layers into a C++ application, check their outputs against plaintext, or measure latency and network traffic for ResNet, VGG, and MobileNetV2. The same OptiEncode interface supports dense and depthwise convolution on CPUs and CUDA GPUs. [Operator API](#usage) · [Experiments and results](#experiments-and-results)
 
 ## Contents
 
