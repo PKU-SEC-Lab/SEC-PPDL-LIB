@@ -141,12 +141,12 @@ We implement block-circulant linear and convolution layers and check their outpu
 
 [Paper](https://proceedings.neurips.cc/paper_files/paper/2024/hash/ca9873918aa72e9033041f76e77b5c15-Abstract-Conference.html) · [Code](Layer/LinearLayer/src/CirLinear.cpp) · [Reproduce (operators)](Experiments/PrivCirNet/README.md) · [BibTeX](#cite-privcirnet) · [Project and models](https://github.com/Tianshi-Xu/PrivCirNet)
 
-### Comparison methods
+### Additional implementations
 
-- **BumbleBee (NDSS 2025)** — shared-input matrix multiplication with HE cross terms. [Paper](https://doi.org/10.14722/ndss.2025.230057) · [Implementation](Layer/LinearLayer/src/Linear.cpp)
-- **BOLT (IEEE S&P 2024)** — packed linear layer. [Paper](https://doi.org/10.1109/SP54263.2024.00130) · [Implementation](Layer/LinearLayer/src/Linear.cpp)
-- **Falcon (ICCAD 2023)** — depthwise packing reproduction and MobileNetV2 comparison. [Paper](https://arxiv.org/abs/2308.13189) · [Reproduction](Experiments/OptiPrime/falcon/README.md)
-- **Cheetah (USENIX Security 2022)** — encrypted convolution baseline. [Paper](https://www.usenix.org/conference/usenixsecurity22/presentation/huang-zhicong) · [Implementation](Layer/LinearLayer/src/ConvCheetah.cpp)
+- **BumbleBee (NDSS 2025)** — Matrix multiplication on secret-shared inputs, with HE for the cross terms. [Paper](https://doi.org/10.14722/ndss.2025.230057) · [Implementation](Layer/LinearLayer/src/Linear.cpp)
+- **BOLT (IEEE S&P 2024)** — Packed linear layer. [Paper](https://doi.org/10.1109/SP54263.2024.00130) · [Implementation](Layer/LinearLayer/src/Linear.cpp)
+- **Falcon (ICCAD 2023)** — Reproduction of the depthwise convolution packing scheme, with a MobileNetV2 comparison. [Paper](https://arxiv.org/abs/2308.13189) · [Reproduction](Experiments/OptiPrime/falcon/README.md)
+- **Cheetah (USENIX Security 2022)** — Encrypted convolution used as the baseline in our inference experiments. [Paper](https://www.usenix.org/conference/usenixsecurity22/presentation/huang-zhicong) · [Implementation](Layer/LinearLayer/src/ConvCheetah.cpp)
 
 ## License
 
