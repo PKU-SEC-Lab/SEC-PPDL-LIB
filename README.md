@@ -1,12 +1,15 @@
-![Two computing endpoints exchanging encrypted data](docs/assets/sec-ppdl.jpg)
+![SEC-PPDL by PKU SEC Lab: homomorphic convolution followed by an MPC activation](docs/assets/sec-ppdl.jpg)
 
 # SEC-PPDL
+
+[![Version: development](https://img.shields.io/badge/version-development-176B70)](https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tags)
+[![License: unspecified](https://img.shields.io/badge/license-unspecified-626D76)](#license)
 
 ## About
 
 SEC-PPDL is the PKU SEC Lab C++ library for two-party private neural network inference. Combine homomorphic encryption (HE) for linear layers with secure multiparty computation (MPC) for activations and comparisons. Applications can link individual operators or use the shared protocol runtime.
 
-[Quick start](#quick-start) · [Operator usage](#usage) · [Experiments](#performance) · [Publications](#publications) · [Contributor guide](CONTRIBUTING.md)
+[Quick start](#quick-start) · [Run PrivCirNet](#run-privcirnet) · [Operator usage](#usage) · [Experiments](#performance) · [Publications](#publications) · [Contributor guide](CONTRIBUTING.md)
 
 ## News
 
@@ -34,6 +37,24 @@ ctest --test-dir build -R '^optiencode_conv$' --output-on-failure
 ```
 
 Use `-DSEC_PPDL_BUILD_EXPERIMENTS=ON` for end-to-end models and benchmarks. Use a separate `build-gpu/` directory with `-DUSE_HE_GPU=ON` after installing the [GPU dependency](Extern/README.md#gpu-dependency).
+
+### Run PrivCirNet
+
+SEC-PPDL includes the two-party block-circulant linear and convolution operators. Build both CPU checks from the repository root after installing the dependencies.
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+cmake --build build --target test_cir_linear test_cir_conv -j8
+```
+
+For each row, start the server in one terminal, then run the client in a second terminal on the same host. The server compares reconstructed outputs with a plaintext reference and prints a result for each case.
+
+| Operator | Terminal 1 · server | Terminal 2 · client |
+|---|---|---|
+| Block-circulant linear layer | `./build/Test/test_cir_linear r=1 p=1234` | `./build/Test/test_cir_linear r=2 p=1234` |
+| Block-circulant convolution | `./build/Test/test_cir_conv r=1 p=1235` | `./build/Test/test_cir_conv r=2 p=1235` |
+
+For rotation counts and timings, use the [linear-layer benchmark](Experiments/Benchmarks/README.md). For training, layer-wise block-size selection and pretrained models, see the [official PrivCirNet repository](https://github.com/Tianshi-Xu/PrivCirNet).
 
 ## Usage
 
@@ -64,28 +85,42 @@ Each experiment documents its own network settings, timing boundaries and units.
 
 ## Publications
 
-### Papers and components implemented here
+### MICRO 2026 · OptiPrime
 
-| Venue | Paper | Scope in this repository |
-|---|---|---|
-| MICRO 2026 | [OptiPrime](https://arxiv.org/abs/2609.16898) | [OptiEncode convolution](Layer/LinearLayer/include/LinearLayer/ConvOptiEncode.h) |
-| USENIX Security 2025 | [Breaking the Layer Barrier](https://www.usenix.org/conference/usenixsecurity25/presentation/xu-tianshi) | [CKKS encoding primitives](Operator/LinearOperator/include/LinearOperator/Polynomial.h) and [linear-operator checks](Test/src/TestLinearOperator.cpp) |
-| NeurIPS 2024 | [PrivCirNet](https://proceedings.neurips.cc/paper_files/paper/2024/file/ca9873918aa72e9033041f76e77b5c15-Paper-Conference.pdf) | [Block-circulant linear layers](Layer/LinearLayer/include/LinearLayer/CirLinear.h) and [convolution](Layer/LinearLayer/src/CirConv.cpp) |
+OptiPrime's released inference code uses SEC-PPDL's OptiEncode convolution. The ImageNet experiment shows how to compose the operator with MPC activations.
 
-The library also includes implementations of selected operators from these comparison methods.
+> Jiangrui Yu, Ye Yu, Si Chen, Chenqi Lin, Wenxuan Zeng, Junfeng Fan, Mingyu Gao, and Meng Li. **OptiPrime: Optimizing Private Inference through Protocol-Hardware Co-design.** MICRO 2026.
 
-| Venue | Method | Implemented component |
-|---|---|---|
-| NDSS 2025 | [BumbleBee](https://doi.org/10.14722/ndss.2025.230057) | [Shared-input matrix multiplication using HE cross terms](Layer/LinearLayer/src/Linear.cpp) |
-| IEEE S&P 2024 | [BOLT](https://doi.org/10.1109/SP54263.2024.00130) | [Packed linear layer](Layer/LinearLayer/src/Linear.cpp) |
-| ICCAD 2023 | [Falcon](https://arxiv.org/abs/2308.13189) | [Depthwise packing reproduction](Experiments/OptiPrime/falcon/README.md) |
-| USENIX Security 2022 | [Cheetah](https://www.usenix.org/conference/usenixsecurity22/presentation/huang-zhicong) | [Encrypted convolution baseline](Layer/LinearLayer/src/ConvCheetah.cpp) |
+[Paper](https://arxiv.org/abs/2609.16898) · [Project](https://jerryfishy.github.io/OptiPrime/) · [Operator](Layer/LinearLayer/include/LinearLayer/ConvOptiEncode.h) · [Evaluation](Experiments/OptiPrime/README.md) · [BibTeX](#citation)
 
-### Research artifacts using SEC-PPDL
+### USENIX Security 2025 · Breaking the Layer Barrier
 
-- **OptiPrime (MICRO 2026).** The released project links to SEC-PPDL for its code. Its ImageNet evaluation runs the library's operators end to end. [Project repository](https://github.com/PKU-SEC-Lab/OptiPrime) · [Evaluation](Experiments/OptiPrime/README.md)
+The repository includes CKKS encoding primitives and linear-operator checks relevant to hybrid CKKS/MPC inference.
 
-To add a publication, include its venue, paper link, and the artifact or source that identifies its connection to SEC-PPDL.
+> Tianshi Xu, Wen-jie Lu, Jiangrui Yu, Yi Chen, Chenqi Lin, Runsheng Wang, and Meng Li. **Breaking the Layer Barrier: Remodeling Private Transformer Inference with Hybrid CKKS and MPC.** USENIX Security 2025.
+
+[Paper](https://www.usenix.org/conference/usenixsecurity25/presentation/xu-tianshi) · [Primitives](Operator/LinearOperator/include/LinearOperator/Polynomial.h) · [Tests](Test/src/TestLinearOperator.cpp) · [BibTeX](#citation)
+
+### NeurIPS 2024 · PrivCirNet
+
+The authors distribute their private-inference operators through SEC-PPDL. The original project provides training code and pretrained networks.
+
+> Tianshi Xu, Lemeng Wu, Runsheng Wang, and Meng Li. **PrivCirNet: Efficient Private Inference via Block Circulant Transformation.** NeurIPS 2024.
+
+[Paper](https://proceedings.neurips.cc/paper_files/paper/2024/hash/ca9873918aa72e9033041f76e77b5c15-Abstract-Conference.html) · [Project and models](https://github.com/Tianshi-Xu/PrivCirNet) · [Run the operators](#run-privcirnet) · [BibTeX](#citation)
+
+### Comparison methods
+
+- **BumbleBee (NDSS 2025)** — shared-input matrix multiplication with HE cross terms. [Paper](https://doi.org/10.14722/ndss.2025.230057) · [Implementation](Layer/LinearLayer/src/Linear.cpp)
+- **BOLT (IEEE S&P 2024)** — packed linear layer. [Paper](https://doi.org/10.1109/SP54263.2024.00130) · [Implementation](Layer/LinearLayer/src/Linear.cpp)
+- **Falcon (ICCAD 2023)** — depthwise packing reproduction and MobileNetV2 comparison. [Paper](https://arxiv.org/abs/2308.13189) · [Reproduction](Experiments/OptiPrime/falcon/README.md)
+- **Cheetah (USENIX Security 2022)** — encrypted convolution baseline. [Paper](https://www.usenix.org/conference/usenixsecurity22/presentation/huang-zhicong) · [Implementation](Layer/LinearLayer/src/ConvCheetah.cpp)
+
+To add a user publication, include its venue, paper link and an artifact showing how it uses SEC-PPDL.
+
+## License
+
+This repository currently has no project-wide license file. Third-party components carry their own license notices. [Dependencies](Extern/README.md) · [ArgMapping license](Utils/include/Utils/ArgMapping/LICENSE)
 
 ## Citation
 
