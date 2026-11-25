@@ -1,19 +1,22 @@
 ![SEC-PPDL by PKU SEC Lab: homomorphic convolution followed by an MPC activation](docs/assets/sec-ppdl.jpg)
 
-<h1 align="center">SEC-PPDL: A High-Performance Library for Two-Party Private Neural Network Inference on CPUs and GPUs</h1>
+<h3 align="center">SEC-PPDL: A High-Performance Library for Two-Party Private Neural Network Inference on CPUs and GPUs</h3>
 
-<p align="center">Build private inference pipelines in C++ with encrypted linear layers and secure activations.</p>
+<p align="center">Start with one encrypted convolution, then run a full ResNet and measure what the two parties exchange.</p>
 
 <p align="center">
-  <a href="https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tree/v1.0"><img src="https://img.shields.io/badge/version-1.0-176B70" alt="Version: 1.0"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-176B70" alt="License: MIT"></a>
-  <a href="#current-support"><img src="https://img.shields.io/badge/Operator-examples-355B87" alt="Operator examples"></a>
-  <a href="#experiments-and-results"><img src="https://img.shields.io/badge/Experiment-results-355B87" alt="Experiment results"></a>
+  <a href="https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tree/v1.0"><img src="https://img.shields.io/badge/version-1.0-38689B" alt="Version: 1.0"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-29736B" alt="License: MIT"></a>
+  <a href="#current-support"><img src="https://img.shields.io/badge/Operator-examples-685394" alt="Operator examples"></a>
+  <a href="#experiments-and-results"><img src="https://img.shields.io/badge/Experiment-results-9A591F" alt="Experiment results"></a>
+  <a href="https://mengli.me/"><img src="https://img.shields.io/badge/PKU-SEC_Lab-9B354C" alt="PKU SEC Lab homepage"></a>
 </p>
 
 ## About
 
-PKU SEC Lab maintains the shared homomorphic encryption (HE) and secure multiparty computation (MPC) operators used across the [research implementations](#publications). Applications can link individual operators, select a CPU or CUDA HE backend, and reuse the same two-party runtime.
+SEC-PPDL is the C++ library we use at PKU SEC Lab to run a neural network when one party holds the input and the other holds the model. It combines homomorphic encryption (HE) for linear layers with secure multiparty computation (MPC) for operations such as ReLU and truncation.
+
+You can link an individual layer into your own application or run the models in `Experiments/`. Our ResNet, VGG and MobileNetV2 experiments use the same two-party runtime to measure inference latency and communication. [Operator API](#usage) · [Experiments and results](#experiments-and-results)
 
 ## Contents
 
@@ -116,7 +119,7 @@ Each experiment documents its own network settings, timing boundaries and units.
 
 ### MICRO 2026 · OptiPrime
 
-OptiPrime's released inference code uses SEC-PPDL's OptiEncode convolution. The ImageNet experiment shows how to compose the operator with MPC activations.
+We implement OptiEncode convolution on CPUs and GPUs. In the ImageNet experiment, we combine it with MPC activations and measure end-to-end latency and communication.
 
 > Jiangrui Yu, Ye Yu, Si Chen, Chenqi Lin, Wenxuan Zeng, Junfeng Fan, Mingyu Gao, and Meng Li. **OptiPrime: Optimizing Private Inference through Protocol-Hardware Co-design.** MICRO 2026.
 
@@ -124,7 +127,7 @@ OptiPrime's released inference code uses SEC-PPDL's OptiEncode convolution. The 
 
 ### USENIX Security 2025 · Breaking the Layer Barrier
 
-The repository includes CKKS encoding primitives and linear-operator checks relevant to hybrid CKKS/MPC inference.
+We study how to combine CKKS and MPC for private Transformer inference. Here we provide CKKS encoding primitives and a two-party check for element-wise multiplication.
 
 > Tianshi Xu, Wen-jie Lu, Jiangrui Yu, Yi Chen, Chenqi Lin, Runsheng Wang, and Meng Li. **Breaking the Layer Barrier: Remodeling Private Transformer Inference with Hybrid CKKS and MPC.** USENIX Security 2025.
 
@@ -132,7 +135,7 @@ The repository includes CKKS encoding primitives and linear-operator checks rele
 
 ### NeurIPS 2024 · PrivCirNet
 
-The authors distribute their private-inference operators through SEC-PPDL. The original project provides training code and pretrained networks.
+We implement block-circulant linear and convolution layers and check their outputs against plaintext. We provide training code and pretrained models in the PrivCirNet project.
 
 > Tianshi Xu, Lemeng Wu, Runsheng Wang, and Meng Li. **PrivCirNet: Efficient Private Inference via Block Circulant Transformation.** NeurIPS 2024.
 
@@ -144,8 +147,6 @@ The authors distribute their private-inference operators through SEC-PPDL. The o
 - **BOLT (IEEE S&P 2024)** — packed linear layer. [Paper](https://doi.org/10.1109/SP54263.2024.00130) · [Implementation](Layer/LinearLayer/src/Linear.cpp)
 - **Falcon (ICCAD 2023)** — depthwise packing reproduction and MobileNetV2 comparison. [Paper](https://arxiv.org/abs/2308.13189) · [Reproduction](Experiments/OptiPrime/falcon/README.md)
 - **Cheetah (USENIX Security 2022)** — encrypted convolution baseline. [Paper](https://www.usenix.org/conference/usenixsecurity22/presentation/huang-zhicong) · [Implementation](Layer/LinearLayer/src/ConvCheetah.cpp)
-
-To add a user publication, include its venue, paper link and an artifact showing how it uses SEC-PPDL.
 
 ## License
 
