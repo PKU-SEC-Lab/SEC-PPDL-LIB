@@ -1,11 +1,15 @@
 ![SEC-PPDL by PKU SEC Lab: homomorphic convolution followed by an MPC activation](docs/assets/sec-ppdl.jpg)
 
-# SEC-PPDL: A High-Performance C++ Library for Two-Party Private Neural Network Inference on CPUs and GPUs
+<h1 align="center">SEC-PPDL: A High-Performance Library for Two-Party Private Neural Network Inference on CPUs and GPUs</h1>
 
-Build private inference pipelines in C++ with encrypted linear layers and secure activations.
+<p align="center">Build private inference pipelines in C++ with encrypted linear layers and secure activations.</p>
 
-[![Version: 1.0](https://img.shields.io/badge/version-1.0-176B70)](https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tree/v1.0)
-[![License: MIT](https://img.shields.io/badge/license-MIT-176B70)](LICENSE)
+<p align="center">
+  <a href="https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tree/v1.0"><img src="https://img.shields.io/badge/version-1.0-176B70" alt="Version: 1.0"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-176B70" alt="License: MIT"></a>
+  <a href="#current-support"><img src="https://img.shields.io/badge/Operator-examples-355B87" alt="Operator examples"></a>
+  <a href="#experiments-and-results"><img src="https://img.shields.io/badge/Experiment-results-355B87" alt="Experiment results"></a>
+</p>
 
 ## About
 
@@ -30,12 +34,12 @@ PKU SEC Lab maintains the shared homomorphic encryption (HE) and secure multipar
 
 ## Current support
 
-| Component | Available in the library | Entry point |
-|---|---|---|
-| Encrypted convolution | OptiEncode dense and multiplier-one depthwise convolution on CPU and CUDA; Cheetah and block-circulant convolution | [OptiEncode](Layer/LinearLayer/include/LinearLayer/ConvOptiEncode.h) · [Other convolutions](Layer/LinearLayer/include/LinearLayer/Conv.h) |
-| Linear algebra | Packed matrix multiplication and block-circulant linear layers | [Linear](Layer/LinearLayer/include/LinearLayer/Linear.h) · [CirLinear](Layer/LinearLayer/include/LinearLayer/CirLinear.h) |
-| Secure nonlinear operators | ReLU, pooling, fixed-point comparison, selection and truncation | [Layers](Layer/NonlinearLayer/include/NonlinearLayer) · [Fixed-point protocols](Operator/NonlinearOperator/include/NonlinearOperator/FixPoint.h) |
-| Two-party runtime | HE key setup, IKNP or Ferret OT, communication counters | [Runtime](Runtime/include/Runtime/Primitive.h) |
+| Component | Available in the library | API | Run an example |
+|---|---|---|---|
+| Encrypted convolution | OptiEncode dense and multiplier-one depthwise convolution on CPU and CUDA; Cheetah and block-circulant convolution | [OptiEncode](Layer/LinearLayer/include/LinearLayer/ConvOptiEncode.h) · [Other convolutions](Layer/LinearLayer/include/LinearLayer/Conv.h) | [OptiEncode convolution](#quick-start) |
+| Linear algebra | Packed matrix multiplication and block-circulant linear layers | [Linear](Layer/LinearLayer/include/LinearLayer/Linear.h) · [CirLinear](Layer/LinearLayer/include/LinearLayer/CirLinear.h) | [Block-circulant layers](Experiments/PrivCirNet/README.md#build-the-checks) |
+| Secure nonlinear operators | ReLU, pooling, fixed-point comparison, selection and truncation | [Layers](Layer/NonlinearLayer/include/NonlinearLayer) · [Fixed-point protocols](Operator/NonlinearOperator/include/NonlinearOperator/FixPoint.h) | [Fixed-point comparison](#two-party-operator-checks) |
+| Two-party runtime | HE key setup, IKNP or Ferret OT, communication counters | [Runtime](Runtime/include/Runtime/Primitive.h) | [Two-party setup](#two-party-operator-checks) |
 
 ## Quick start
 
@@ -50,6 +54,21 @@ ctest --test-dir build -R '^optiencode_conv$' --output-on-failure
 ```
 
 Use `-DSEC_PPDL_BUILD_EXPERIMENTS=ON` for end-to-end models and benchmarks. Use a separate `build-gpu/` directory with `-DUSE_HE_GPU=ON` after installing the [GPU dependency](Extern/README.md#gpu-dependency).
+
+### Two-party operator checks
+
+With `BUILD_TESTING=ON`, build the checks from the repository root.
+
+```bash
+cmake --build build --target test_linear_operator test_fixpoint -j8
+```
+
+Start the server in one terminal, then run its client in a second terminal on the same machine.
+
+| Check | Server | Client |
+|---|---|---|
+| Element-wise square and product | `./build/Test/test_linear_operator r=1 p=32000` | `./build/Test/test_linear_operator r=2 p=32000` |
+| Fixed-point comparison with a constant | `./build/Test/test_fixpoint r=1 p=32001` | `./build/Test/test_fixpoint r=2 p=32001` |
 
 ## Usage
 
@@ -101,7 +120,7 @@ OptiPrime's released inference code uses SEC-PPDL's OptiEncode convolution. The 
 
 > Jiangrui Yu, Ye Yu, Si Chen, Chenqi Lin, Wenxuan Zeng, Junfeng Fan, Mingyu Gao, and Meng Li. **OptiPrime: Optimizing Private Inference through Protocol-Hardware Co-design.** MICRO 2026.
 
-[Paper](https://arxiv.org/abs/2609.16898) · [Project](https://jerryfishy.github.io/OptiPrime/) · [Operator](Layer/LinearLayer/include/LinearLayer/ConvOptiEncode.h) · [Evaluation](Experiments/OptiPrime/README.md) · [BibTeX](#citation)
+[Paper](https://arxiv.org/abs/2609.16898) · [Code](Layer/LinearLayer/include/LinearLayer/ConvOptiEncode.h) · [Reproduce](Experiments/OptiPrime/README.md#quick-start) · [BibTeX](#cite-optiprime) · [Project](https://jerryfishy.github.io/OptiPrime/)
 
 ### USENIX Security 2025 · Breaking the Layer Barrier
 
@@ -109,7 +128,7 @@ The repository includes CKKS encoding primitives and linear-operator checks rele
 
 > Tianshi Xu, Wen-jie Lu, Jiangrui Yu, Yi Chen, Chenqi Lin, Runsheng Wang, and Meng Li. **Breaking the Layer Barrier: Remodeling Private Transformer Inference with Hybrid CKKS and MPC.** USENIX Security 2025.
 
-[Paper](https://www.usenix.org/conference/usenixsecurity25/presentation/xu-tianshi) · [Primitives](Operator/LinearOperator/include/LinearOperator/Polynomial.h) · [Tests](Test/src/TestLinearOperator.cpp) · [BibTeX](#citation)
+[Paper](https://www.usenix.org/conference/usenixsecurity25/presentation/xu-tianshi) · [Code](Operator/LinearOperator/include/LinearOperator/Polynomial.h) · [Reproduce (operator check)](#two-party-operator-checks) · [BibTeX](#cite-breaking)
 
 ### NeurIPS 2024 · PrivCirNet
 
@@ -117,7 +136,7 @@ The authors distribute their private-inference operators through SEC-PPDL. The o
 
 > Tianshi Xu, Lemeng Wu, Runsheng Wang, and Meng Li. **PrivCirNet: Efficient Private Inference via Block Circulant Transformation.** NeurIPS 2024.
 
-[Paper](https://proceedings.neurips.cc/paper_files/paper/2024/hash/ca9873918aa72e9033041f76e77b5c15-Abstract-Conference.html) · [Project and models](https://github.com/Tianshi-Xu/PrivCirNet) · [Run the operators](Experiments/PrivCirNet/README.md) · [BibTeX](#citation)
+[Paper](https://proceedings.neurips.cc/paper_files/paper/2024/hash/ca9873918aa72e9033041f76e77b5c15-Abstract-Conference.html) · [Code](Layer/LinearLayer/src/CirLinear.cpp) · [Reproduce (operators)](Experiments/PrivCirNet/README.md) · [BibTeX](#cite-privcirnet) · [Project and models](https://github.com/Tianshi-Xu/PrivCirNet)
 
 ### Comparison methods
 
@@ -134,7 +153,9 @@ SEC-PPDL is distributed under the [MIT License](LICENSE). Third-party dependenci
 
 ## Citation
 
-Please cite PrivCirNet and Breaking the Layer Barrier when using SEC-PPDL. If you use its OptiEncode convolution implementation, please also cite OptiPrime.
+If you use SEC-PPDL in your research, please cite all three papers: PrivCirNet, Breaking the Layer Barrier, and OptiPrime.
+
+<a name="cite-privcirnet"></a>
 
 ```bibtex
 @article{xu2024privcirnet,
@@ -145,7 +166,11 @@ Please cite PrivCirNet and Breaking the Layer Barrier when using SEC-PPDL. If yo
   pages={111802--111831},
   year={2024}
 }
+```
 
+<a name="cite-breaking"></a>
+
+```bibtex
 @inproceedings{xu2025breaking,
   title={Breaking the layer barrier: Remodeling private transformer inference with hybrid {CKKS} and {MPC}},
   author={Xu, Tianshi and Lu, Wen-jie and Yu, Jiangrui and Chen, Yi and Lin, Chenqi and Wang, Runsheng and Li, Meng},
@@ -153,7 +178,11 @@ Please cite PrivCirNet and Breaking the Layer Barrier when using SEC-PPDL. If yo
   pages={2653--2672},
   year={2025}
 }
+```
 
+<a name="cite-optiprime"></a>
+
+```bibtex
 @inproceedings{yu2026optiprime,
   title={{OptiPrime}: Optimizing Private Inference through Protocol-Hardware Co-design},
   author={Yu, Jiangrui and Yu, Ye and Chen, Si and Lin, Chenqi and Zeng, Wenxuan and Fan, Junfeng and Gao, Mingyu and Li, Meng},
