@@ -2,12 +2,14 @@
 
 # SEC-PPDL · Two-Party Private Neural Network Inference
 
+Build private inference pipelines in C++ with encrypted linear layers and secure activations.
+
 [![Version: 1.0](https://img.shields.io/badge/version-1.0-176B70)](https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tree/v1.0)
 [![License: MIT](https://img.shields.io/badge/license-MIT-176B70)](LICENSE)
 
 ## About
 
-SEC-PPDL is a C++ library for two-party private neural network inference on CPUs and GPUs, developed by PKU SEC Lab. It combines homomorphic encryption (HE) for linear layers with secure multiparty computation (MPC) for activations and comparisons. Link individual operators or use the shared two-party runtime.
+PKU SEC Lab maintains the shared homomorphic encryption (HE) and secure multiparty computation (MPC) operators used across the [research implementations](#publications). Applications can link individual operators, select a CPU or CUDA HE backend, and reuse the same two-party runtime.
 
 ## Contents
 
@@ -15,10 +17,11 @@ SEC-PPDL is a C++ library for two-party private neural network inference on CPUs
 2. [Current support](#current-support)
 3. [Quick start](#quick-start)
 4. [Operator API](#usage)
-5. [Experiments and results](#experiments-and-results)
-6. [Publications](#publications)
-7. [License](#license) and [citation](#citation)
-8. [Contributing](CONTRIBUTING.md)
+5. [Repository layout](#repository-layout)
+6. [Experiments and results](#experiments-and-results)
+7. [Publications](#publications)
+8. [License](#license) and [citation](#citation)
+9. [Contributing](CONTRIBUTING.md)
 
 ## News
 
@@ -63,6 +66,18 @@ auto output_share = conv(input_share);
 ```
 
 For a power-of-two plaintext modulus, set `options.ciphertext_inverse_normalization = true` on both parties. For depthwise convolution, set `options.depthwise = true` and supply weights shaped `[channels, 1, kernel, kernel]`. [Two-party example and plaintext reference](Test/support/OptiEncodeCases.h)
+
+## Repository layout
+
+| Directory | What to look for |
+|---|---|
+| [Operator/](Operator), [Layer/](Layer) | Encoding and fixed-point primitives, plus callable layers such as convolution, ReLU and pooling. Each module exposes its public headers under `include/`. |
+| [HE/](HE), [OT/](OT), [Runtime/](Runtime) | Encryption backends, oblivious transfer protocols and shared two-party setup. |
+| [Datatype/](Datatype), [Utils/](Utils), [Extern/](Extern) | Tensor types, networking and threading utilities, and pinned third-party dependencies. |
+| [Test/](Test) | Operator correctness checks and their plaintext references. |
+| [Experiments/](Experiments) | Paper-specific guides, end-to-end models, benchmarks and measurement summaries. |
+
+See the [contributor guide](CONTRIBUTING.md#directory-ownership) for file placement and CMake conventions.
 
 <a name="performance"></a>
 
