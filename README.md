@@ -1,19 +1,29 @@
 ![SEC-PPDL by PKU SEC Lab: homomorphic convolution followed by an MPC activation](docs/assets/sec-ppdl.jpg)
 
-# SEC-PPDL
+# SEC-PPDL · Two-Party Private Neural Network Inference
 
 [![Version: 1.0](https://img.shields.io/badge/version-1.0-176B70)](https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tree/v1.0)
 [![License: MIT](https://img.shields.io/badge/license-MIT-176B70)](LICENSE)
 
 ## About
 
-SEC-PPDL is the PKU SEC Lab C++ library for two-party private neural network inference. Combine homomorphic encryption (HE) for linear layers with secure multiparty computation (MPC) for activations and comparisons. Applications can link individual operators or use the shared protocol runtime.
+SEC-PPDL is a C++ library for two-party private neural network inference on CPUs and GPUs, developed by PKU SEC Lab. It combines homomorphic encryption (HE) for linear layers with secure multiparty computation (MPC) for activations and comparisons. Link individual operators or use the shared two-party runtime.
 
-[Quick start](#quick-start) · [Run PrivCirNet](#run-privcirnet) · [Operator usage](#usage) · [Experiments](#performance) · [Publications](#publications) · [Contributor guide](CONTRIBUTING.md)
+## Contents
+
+1. [News](#news)
+2. [Current support](#current-support)
+3. [Quick start](#quick-start)
+4. [Operator API](#usage)
+5. [Experiments and results](#experiments-and-results)
+6. [Publications](#publications)
+7. [License](#license) and [citation](#citation)
+8. [Contributing](CONTRIBUTING.md)
 
 ## News
 
-- OptiPrime (MICRO 2026) adds OptiEncode convolution on CPU and CUDA. The repository also includes a subsequent packed depthwise extension for MobileNetV2. [Project page](https://jerryfishy.github.io/OptiPrime/) · [Depthwise layout](Experiments/OptiPrime/depthwise.md)
+- 📦 **2026-11-26 · SEC-PPDL 1.0.** The MIT-licensed release includes CPU and CUDA operators, two-party checks and end-to-end experiments. [Version 1.0](https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tree/v1.0)
+- 📄 **MICRO 2026 · OptiPrime.** OptiEncode convolution runs on CPU and CUDA. A subsequent extension supports packed depthwise convolution for MobileNetV2. [Project page](https://jerryfishy.github.io/OptiPrime/) · [Depthwise layout](Experiments/OptiPrime/depthwise.md)
 
 ## Current support
 
@@ -38,24 +48,6 @@ ctest --test-dir build -R '^optiencode_conv$' --output-on-failure
 
 Use `-DSEC_PPDL_BUILD_EXPERIMENTS=ON` for end-to-end models and benchmarks. Use a separate `build-gpu/` directory with `-DUSE_HE_GPU=ON` after installing the [GPU dependency](Extern/README.md#gpu-dependency).
 
-### Run PrivCirNet
-
-SEC-PPDL includes the two-party block-circulant linear and convolution operators. Build both CPU checks from the repository root after installing the dependencies.
-
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
-cmake --build build --target test_cir_linear test_cir_conv -j8
-```
-
-For each row, start the server in one terminal, then run the client in a second terminal on the same host. The server compares reconstructed outputs with a plaintext reference and prints a result for each case.
-
-| Operator | Terminal 1 · server | Terminal 2 · client |
-|---|---|---|
-| Block-circulant linear layer | `./build/Test/test_cir_linear r=1 p=1234` | `./build/Test/test_cir_linear r=2 p=1234` |
-| Block-circulant convolution | `./build/Test/test_cir_conv r=1 p=1235` | `./build/Test/test_cir_conv r=2 p=1235` |
-
-For rotation counts and timings, use the [linear-layer benchmark](Experiments/Benchmarks/README.md). For training, layer-wise block-size selection and pretrained models, see the [official PrivCirNet repository](https://github.com/Tianshi-Xu/PrivCirNet).
-
 ## Usage
 
 Link `LinearLayer` in your CMake application. On each party, supply an initialized HE context and a local input share. The server supplies OIHW weights and per-channel bias. The client supplies zero tensors of the same shapes.
@@ -72,12 +64,15 @@ auto output_share = conv(input_share);
 
 For a power-of-two plaintext modulus, set `options.ciphertext_inverse_normalization = true` on both parties. For depthwise convolution, set `options.depthwise = true` and supply weights shaped `[channels, 1, kernel, kernel]`. [Two-party example and plaintext reference](Test/support/OptiEncodeCases.h)
 
-## Performance
+<a name="performance"></a>
+
+## Experiments and results
 
 | Experiment | What is measured |
 |---|---|
 | [OptiPrime ImageNet](Experiments/OptiPrime/README.md#performance) | CPU LAN/WAN latency, bidirectional traffic, and measured ResNet-18 integer plaintext and encrypted top-1/top-5 accuracy |
 | [FaceResNet64](Experiments/FaceResNet/README.md) | Single-image embedding and two-image verification; fixed-point backbones and Compact W4A8 drivers |
+| [PrivCirNet](Experiments/PrivCirNet/README.md) | Block-circulant linear and convolution outputs checked against plaintext; linear-layer rotation and multiplication counts and timings |
 | [Operator benchmarks](Experiments/Benchmarks/README.md) | Per-call timing and traffic for encrypted convolutions, and block-circulant matrix operation counts |
 | [Falcon depthwise comparison](Experiments/OptiPrime/falcon/README.md) | Layer-level packing, operation counts and MobileNetV2 comparison |
 
@@ -107,7 +102,7 @@ The authors distribute their private-inference operators through SEC-PPDL. The o
 
 > Tianshi Xu, Lemeng Wu, Runsheng Wang, and Meng Li. **PrivCirNet: Efficient Private Inference via Block Circulant Transformation.** NeurIPS 2024.
 
-[Paper](https://proceedings.neurips.cc/paper_files/paper/2024/hash/ca9873918aa72e9033041f76e77b5c15-Abstract-Conference.html) · [Project and models](https://github.com/Tianshi-Xu/PrivCirNet) · [Run the operators](#run-privcirnet) · [BibTeX](#citation)
+[Paper](https://proceedings.neurips.cc/paper_files/paper/2024/hash/ca9873918aa72e9033041f76e77b5c15-Abstract-Conference.html) · [Project and models](https://github.com/Tianshi-Xu/PrivCirNet) · [Run the operators](Experiments/PrivCirNet/README.md) · [BibTeX](#citation)
 
 ### Comparison methods
 

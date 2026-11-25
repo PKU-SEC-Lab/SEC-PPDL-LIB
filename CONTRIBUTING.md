@@ -13,6 +13,7 @@
 | `Test/src/`, `Test/support/` | Correctness checks and reusable plaintext references or deterministic cases. A benchmark may reuse a test fixture. |
 | `Experiments/OptiPrime/` | ImageNet graph assembly, model export, inference drivers, published measurement summaries and the Falcon comparison. |
 | `Experiments/FaceResNet/` | Face embeddings, cosine matching, Q12 drivers, W4A8 fixtures and evaluation. |
+| `Experiments/PrivCirNet/` | Reproduction instructions for block-circulant inference operators and their benchmarks. |
 | `Experiments/ResNet/` | Historical fixed-point ResNet examples. |
 | `Experiments/Benchmarks/`, `Experiments/Nonlinear/` | Operator performance drivers and numerical studies. |
 | `Experiments/tools/` | Network shaping and other tools shared across experiments. |
