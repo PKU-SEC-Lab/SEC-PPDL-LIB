@@ -2,8 +2,8 @@
 
 # SEC-PPDL
 
-[![Version: development](https://img.shields.io/badge/version-development-176B70)](https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tags)
-[![License: unspecified](https://img.shields.io/badge/license-unspecified-626D76)](#license)
+[![Version: 1.0](https://img.shields.io/badge/version-1.0-176B70)](https://github.com/PKU-SEC-Lab/SEC-PPDL-LIB/tree/v1.0)
+[![License: MIT](https://img.shields.io/badge/license-MIT-176B70)](LICENSE)
 
 ## About
 
@@ -120,7 +120,7 @@ To add a user publication, include its venue, paper link and an artifact showing
 
 ## License
 
-This repository currently has no project-wide license file. Third-party components carry their own license notices. [Dependencies](Extern/README.md) · [ArgMapping license](Utils/include/Utils/ArgMapping/LICENSE)
+SEC-PPDL is distributed under the [MIT License](LICENSE). Third-party dependencies and files with their own notices retain their respective licenses. [Dependencies](Extern/README.md) · [ArgMapping license](Utils/include/Utils/ArgMapping/LICENSE)
 
 ## Citation
 
